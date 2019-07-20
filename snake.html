@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Snake</title>
+    <style>
+    .container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        margin-top: 100px;
+        align-items: center;
+    }
+    .col {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        border: 1px solid black;
+    }
+    .character {
+        background-color: green;
+    }
+    .apple {
+        background-color: red;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Points: <span id="point-counter">0</span></h1>
+        <div class="row">
+            <div id="one-one" class="col character"></div>
+            <div id="two-one" class="col"></div>
+            <div id="three-one" class="col"></div>
+            <div id="four-one" class="col"></div>
+            <div id="five-one" class="col"></div>
+            <div id="six-one" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="one-two" class="col"></div>
+            <div id="two-two" class="col"></div>
+            <div id="three-two" class="col"></div>
+            <div id="four-two" class="col"></div>
+            <div id="five-two" class="col"></div>
+            <div id="six-two" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="one-three" class="col"></div>
+            <div id="two-three" class="col"></div>
+            <div id="three-three" class="col"></div>
+            <div id="four-three" class="col"></div>
+            <div id="five-three" class="col"></div>
+            <div id="six-three" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="one-four" class="col"></div>
+            <div id="two-four" class="col"></div>
+            <div id="three-four" class="col"></div>
+            <div id="four-four" class="col"></div>
+            <div id="five-four" class="col"></div>
+            <div id="six-four" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="one-five" class="col"></div>
+            <div id="two-five" class="col"></div>
+            <div id="three-five" class="col"></div>
+            <div id="four-five" class="col"></div>
+            <div id="five-five" class="col"></div>
+            <div id="six-five" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="one-six" class="col"></div>
+            <div id="two-six" class="col"></div>
+            <div id="three-six" class="col"></div>
+            <div id="four-six" class="col"></div>
+            <div id="five-six" class="col"></div>
+            <div id="six-six" class="col"></div>
+        </div>
+    </div>
+    <script>
+        class Node {
+            constructor(loc){
+                this.location = loc;
+                this.next = null;
+            }
+        }
+        canvas = [[1,0,0,0,0,0],
+            [0,0,0,0,0,0],
+            [0,0,0,0,0,0],
+            [0,0,0,0,0,0],
+            [0,0,0,0,0,0],
+            [0,0,0,0,0,0],]
+        var character = {
+            head: new Node([0,0]),
+            length: 1,
+            direction: "right",
+            removeTail: () => {
+                let runner = character.head;
+                while(runner.next.next) {
+                    runner = runner.next;
+                };
+                let tail = runner.next;
+                runner.next = null;
+                canvas[tail.location[0]][tail.location[1]] = 0;
+                document.getElementById(grid[tail.location[0]]+"-"+grid[tail.location[1]]).setAttribute("class", "col");
+            },
+            addHead : (location) => {
+                character.length ++;
+                canvas[location[0]][location[1]] = 1;
+                let newHead = new Node(location);
+                newHead.next = character.head;
+                character.head = newHead;
+            },
+            moving : (newLoc) => {
+                canvas[newLoc[0]][newLoc[1]] = 1;
+                let newHead = new Node(newLoc);
+                newHead.next = character.head;
+                character.head = newHead;
+                character.removeTail();
+            }
+        };
+        var apple;
+        var grid = ["one","two","three","four","five","six"];
+        var points = 0;
+        var movement = setInterval(() => {
+            let newLocation = [...character.head.location];
+            switch(character.direction) {
+                case "left":
+                    //left
+                    if (character.head.location[0]) {
+                        newLocation[0] = (character.head.location[0] - 1) % 6;
+                    }
+                    else {
+                        newLocation[0] = 5;
+                    }
+                    break;
+                case "up":
+                    //up
+                    if (character.head.location[1]) {
+                        newLocation[1] = (character.head.location[1] - 1) % 6;
+                    }
+                    else {
+                        newLocation[1] = 5;
+                    }
+                    break;
+                case "right":
+                    //right
+                    newLocation[0] = (character.head.location[0] + 1) % 6;
+                    break;
+                case "down":
+                    //down
+                    newLocation[1] = (character.head.location[1] + 1) % 6;
+            };
+            if (canvas[newLocation[0]][newLocation[1]] === 1) {
+                alert("You Lose");
+                clearInterval(movement);
+            }
+            if (canvas[newLocation[0]][newLocation[1]] === 2){
+                points += 10;
+                document.getElementById("point-counter").innerText = points;
+                if (character.length === 35) {
+                    alert("You Win");
+                    clearInterval(movement);
+                }
+                else {
+                    character.addHead(newLocation);
+                    selectRandomLocation();
+                }
+            }
+            else {
+                character.moving(newLocation);
+            }
+            document.getElementById(grid[character.head.location[0]]+"-"+grid[character.head.location[1]]).setAttribute("class", "col character");
+        },500);
+        function selectRandomLocation() {
+            random = character.head.location
+            while (canvas[random[0]][random[1]] === 1) {
+                var random = [Math.floor(Math.random() * 6), Math.floor(Math.random() * 6)];
+            }
+            apple = random;
+            canvas[apple[0]][apple[1]] = 2;
+            document.getElementById(grid[apple[0]]+"-"+grid[apple[1]]).setAttribute("class", "col apple");
+        }
+        selectRandomLocation();
+        document.onkeydown = (event) => {
+            switch(event.keyCode){
+                case 37:
+                    //left
+                    if(character.direction !== "left" && character.direction !== "right") {
+                        character.direction = "left";
+                    }
+                    break;
+                case 38:
+                    //up
+                    if(character.direction !== "up" && character.direction !== "down") {
+                        character.direction = "up";
+                    }
+                    break;
+                case 39:
+                    //right
+                    if(character.direction !== "left" && character.direction !== "right") {
+                        character.direction = "right";
+                    }
+                    break;
+                case 40:
+                    //down
+                    if(character.direction !== "up" && character.direction !== "down") {
+                        character.direction = "down";
+                    }
+            }
+        };
+    </script>
+</body>
+</html>
